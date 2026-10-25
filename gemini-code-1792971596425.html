@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор Хлібних Одиниць (ХО) | Diabet Diary</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .settings-row select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .product-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .product-btn:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .product-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .product-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .custom-add {
+            margin-top: 16px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .custom-add {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg-color);
+        }
+
+        .total-card {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .total-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Калькулятор Хлібних Одиниць (ХО)</h1>
+            <p>Tech.chebur.shop Solution — Diabet Diary</p>
+        </header>
+
+        <!-- Налаштування -->
+        <div class="card">
+            <div class="settings-row">
+                <span>Скільки грамів вуглеводів в 1 ХО:</span>
+                <select id="xeValue" onchange="calculate()">
+                    <option value="10">10 грамів</option>
+                    <option value="12" selected>12 грамів (стандарт)</option>
+                    <option value="15">15 грамів</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Вибір продуктів -->
+        <div class="card">
+            <h3 style="margin-bottom: 12px; font-size: 1.1rem;">Швидкий вибір продуктів (на 100г)</h3>
+            <input type="text" id="searchBox" class="search-box" placeholder="Пошук продукту..." onkeyup="filterProducts()">
+            <div class="products-grid" id="productsList">
+                <!-- Заповнюється через JS -->
+            </div>
+
+            <!-- Додавання свого продукту -->
+            <div class="custom-add">
+                <input type="text" id="customName" placeholder="Назва продукту">
+                <input type="number" id="customCarbs" placeholder="Вуглеводів на 100г" step="0.1">
+                <button class="btn" onclick="addCustomProduct()">Додати у список</button>
+            </div>
+        </div>
+
+        <!-- Поточна порція -->
+        <div class="card">
+            <h3 style="margin-bottom: 12px; font-size: 1.1rem;">Поточна порція</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Продукт</th>
+                            <th>Вага (г)</th>
+                            <th>Вуглеводи (г)</th>
+                            <th>ХО</th>
+                            <th>Дія</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartTable">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted);">Порція порожня. Виберіть продукти вище.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Підсумок -->
+        <div class="total-card">
+            <div>
+                <div class="total-title">Всього в порції:</div>
+                <div id="totalCarbsText" style="font-size: 0.95rem; opacity: 0.9;">Вуглеводів: 0 г</div>
+            </div>
+            <div>
+                <div class="total-value" id="totalXE">0.0 ХО</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // База продуктів за замовчуванням (вуглеводів на 100г)
+        let defaultProducts = [
+            { name: "Хліб житній", carbs: 45 },
+            { name: "Хліб білий", carbs: 50 },
+            { name: "Гречка (суха)", carbs: 68 },
+            { name: "Вівсянка (суха)", carbs: 65 },
+            { name: "Рис (сухий)", carbs: 75 },
+            { name: "Макарони (сухі)", carbs: 70 },
+            { name: "Картопля", carbs: 16 },
+            { name: "Яблуко", carbs: 10 },
+            { name: "Банан", carbs: 21 },
+            { name: "Молоко 2.5%", carbs: 4.7 },
+            { name: "Цукор", carbs: 99.8 },
+            { name: "Гречка варена", carbs: 20 },
+            { name: "Макарони варені", carbs: 25 }
+        ];
+
+        let cart = [];
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productsList');
+            grid.innerHTML = '';
+            products.forEach((p, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'product-btn';
+                btn.onclick = () => promptWeight(p.name, p.carbs);
+                btn.innerHTML = `
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-info">${p.carbs} г вугл. / 100г</div>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function filterProducts() {
+            const query = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = defaultProducts.filter(p => p.name.toLowerCase().includes(query));
+            renderProducts(filtered);
+        }
+
+        function promptWeight(name, carbs100) {
+            let weightStr = prompt(`Введіть вагу продукту "${name}" у грамах:`, "100");
+            if (weightStr === null) return;
+            let weight = parseFloat(weightStr);
+            if (isNaN(weight) || weight <= 0) {
+                alert("Введіть коректну вагу!");
+                return;
+            }
+
+            cart.push({
+                name: name,
+                weight: weight,
+                carbs: (carbs100 * weight) / 100
+            });
+
+            calculate();
+        }
+
+        function addCustomProduct() {
+            const nameInput = document.getElementById('customName');
+            const carbsInput = document.getElementById('customCarbs');
+            
+            const name = nameInput.value.trim();
+            const carbs = parseFloat(carbsInput.value);
+
+            if (!name || isNaN(carbs) || carbs < 0) {
+                alert("Введіть коректну назву та вуглеводи!");
+                return;
+            }
+
+            defaultProducts.push({ name, carbs });
+            renderProducts(defaultProducts);
+
+            nameInput.value = '';
+            carbsInput.value = '';
+            promptWeight(name, carbs);
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            calculate();
+        }
+
+        function calculate() {
+            const xeBase = parseFloat(document.getElementById('xeValue').value);
+            const tbody = document.getElementById('cartTable');
+            tbody.innerHTML = '';
+
+            if (cart.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Порція порожня. Виберіть продукти вище.</td></tr>`;
+                document.getElementById('totalCarbsText').innerText = "Вуглеводів: 0 г";
+                document.getElementById('totalXE').innerText = "0.0 ХО";
+                return;
+            }
+
+            let totalCarbs = 0;
+
+            cart.forEach((item, index) => {
+                let itemXE = item.carbs / xeBase;
+                totalCarbs += item.carbs;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.weight} г</td>
+                    <td>${item.carbs.toFixed(1)} г</td>
+                    <td><strong>${itemXE.toFixed(2)} ХО</strong></td>
+                    <td><button class="delete-btn" onclick="removeItem(${index})">Видалити</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            let totalXE = totalCarbs / xeBase;
+            document.getElementById('totalCarbsText').innerText = `Всього вуглеводів: ${totalCarbs.toFixed(1)} г`;
+            document.getElementById('totalXE').innerText = `${totalXE.toFixed(2)} ХО`;
+        }
+
+        renderProducts(defaultProducts);
+    </script>
+</body>
+</html>
